@@ -2,7 +2,8 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
 class Crawl {
-    
+    arrayOfProducts = []
+
     processProduct = (product_url_address) => {
         const request_promise = require('request-promise');
         request_promise({
@@ -19,16 +20,17 @@ class Crawl {
             const dom = new JSDOM(response.body, { includeNodeLocations: true });
             const document = dom.window.document;
             const name = document.querySelector(".product-name *");
-            const price = document.querySelector(".price-including-tax .price");
-            const abv = document.querySelector(".abv span");
+            let price = document.querySelector(".price-including-tax .price");
+            let abv = document.querySelector(".abv span");
             const size = document.querySelector(".bottleSize span");
-            const result = [name.textContent, price.textContent, abv.textContent, size.textContent];
-            console.log(result);
-            return result;
+            if(name && price && abv && size){
+                price = price.textContent.replace(/[ \t\n]*/g,'');
+                abv = abv.textContent.replace(/\%/i,''); // in percent
+                const result = [name.textContent, price, abv, size.textContent];
+                console.log(result);
+                this.arrayOfProducts.push(result);
+            }
         })
-        .catch(function(err) {
-            console.log("Error: " + err);
-        });
     }
 
     crawlWebpage = () => {
@@ -48,12 +50,14 @@ class Crawl {
             const document = dom.window.document;
             const hrefsAll = [...document.querySelectorAll(".product-item-information > a")];
             hrefsAll.map(hrefs => {
-                console.log(this.processProduct(hrefs.href));
+                this.processProduct(hrefs.href);
             });
         })
         .catch(function(err) {
             console.log("Error: " + err);
         });
+
+        console.log(this.arrayOfProducts);
     }
 
 }
