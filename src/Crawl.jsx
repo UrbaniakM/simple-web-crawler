@@ -6,7 +6,9 @@ class Crawl {
 
     processProduct = (product_url_address) => {
         const request_promise = require('request-promise');
-        request_promise({
+        // let ret = request_promise({
+        // return ret.resolve ...
+        return request_promise({
             uri: product_url_address,
             method: 'GET',
             resolveWithFullResponse: true,
@@ -16,21 +18,21 @@ class Crawl {
                 'User-Agent': 'Request-Promise'
             }
         })
-        .then((response) => {
-            const dom = new JSDOM(response.body, { includeNodeLocations: true });
-            const document = dom.window.document;
-            const name = document.querySelector(".product-name *");
-            let price = document.querySelector(".price-including-tax .price");
-            let abv = document.querySelector(".abv span");
-            const size = document.querySelector(".bottleSize span");
-            if(name && price && abv && size){
-                price = price.textContent.replace(/[ \t\n]*/g,'');
-                abv = abv.textContent.replace(/\%/i,''); // in percent
-                const result = [name.textContent, price, abv, size.textContent];
-                console.log(result);
-                this.arrayOfProducts.push(result);
-            }
-        })
+        //.then((response) => {
+        //    const dom = new JSDOM(response.body, { includeNodeLocations: true });
+        //    const document = dom.window.document;
+        //    const name = document.querySelector(".product-name *");
+        //    let price = document.querySelector(".price-including-tax .price");
+        //    let abv = document.querySelector(".abv span");
+        //    const size = document.querySelector(".bottleSize span");
+        //    if(name && price && abv && size){
+        //        price = price.textContent.replace(/[ \t\n]*/g,'');
+        //        abv = abv.textContent.replace(/\%/i,''); // in percent
+        //        const result = [name.textContent, price, abv, size.textContent];
+        //        console.log(result);
+        //        this.arrayOfProducts.push(result);
+        //    }
+        //})
     }
 
     crawlWebpage = () => {
@@ -49,15 +51,34 @@ class Crawl {
             const dom = new JSDOM(response.body, { includeNodeLocations: true });
             const document = dom.window.document;
             const hrefsAll = [...document.querySelectorAll(".product-item-information > a")];
+            let arrayPromises = [];
             hrefsAll.map(hrefs => {
-                this.processProduct(hrefs.href);
+                arrayPromises.push(this.processProduct(hrefs.href));
             });
+            Promise.all(arrayPromises).then((responses) => {
+                responses.forEach((response) => {
+                    const dom = new JSDOM(response.body, { includeNodeLocations: true });
+                    const document = dom.window.document;
+                    const name = document.querySelector(".product-name *");
+                    let price = document.querySelector(".price-including-tax .price");
+                    let abv = document.querySelector(".abv span");
+                    const size = document.querySelector(".bottleSize span");
+                    if(name && price && abv && size){
+                        price = price.textContent.replace(/[ \t\n]*/g,'');
+                        abv = abv.textContent.replace(/\%/i,''); // in percent
+                        const result = [name.textContent, price, abv, size.textContent];
+                        this.arrayOfProducts.push(result);
+                    }
+                })
+            })
+            .then( () => {
+                console.log(this.arrayOfProducts);
+                // TODO: sortowanie
+            })
         })
         .catch(function(err) {
             console.log("Error: " + err);
         });
-
-        console.log(this.arrayOfProducts);
     }
 
 }
