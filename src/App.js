@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import Crawl from './Crawl'
+import Product from './Product';
+
+import Crawl from './Crawl';
 
 class App extends Component {
   render() {
