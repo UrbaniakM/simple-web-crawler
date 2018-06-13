@@ -26,11 +26,13 @@ class Crawl {
         const name = document.querySelector(".product-name *");
         let price = document.querySelector(".price-including-tax .price");
         let abv = document.querySelector(".abv span");
-        const size = document.querySelector(".bottleSize span");
+        let size = document.querySelector(".bottleSize span");
         if(name && price && abv && size){
             price = price.textContent.replace(/[ \t\n]*/g,'');
             abv = abv.textContent.replace(/\%/i,''); // in percent
-            const result = [name.textContent, price, abv, size.textContent];
+            size = size.textContent;
+            let alcoholToPrice = abv * size.substring(0, size.length - 2) / 100 / price.substr(1);
+            const result = {'name': name.textContent,'price': price, 'abv': abv, 'size': size, 'alcoholToPrice': alcoholToPrice};
             this.arrayOfProducts.push(result);
         }
     }
@@ -61,8 +63,12 @@ class Crawl {
                 })
             })
             .then( () => {
+                this.arrayOfProducts.sort((obj1,obj2) => {
+                    if( obj1.alcoholToPrice > obj2.alcoholToPrice ) return -1;
+                    if( obj1.alcoholToPrice < obj2.alcoholToPrice) return 1;
+                    return 0;
+                });
                 console.log(this.arrayOfProducts);
-                // TODO: sortowanie
                 return this.arrayOfProducts;
             })
         })

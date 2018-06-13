@@ -4,12 +4,12 @@ import './App.css';
 
 import ProductsList from './ProductsList';
 
-//import Crawl from './Crawl';
+import Crawl from './Crawl';
 
 class App extends Component {
   render() {
-    //var crawl = new Crawl();
-    //crawl.crawlWebpage();
+    var crawl = new Crawl();
+    crawl.crawlWebpage();
     return (
       <div className="App">
         <header className="App-header">

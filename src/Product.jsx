@@ -29,16 +29,19 @@ class Product extends Component {
         	const name = document.querySelector(".product-name *");
         	let price = document.querySelector(".price-including-tax .price");
         	let abv = document.querySelector(".abv span");
-        	const size = document.querySelector(".bottleSize span");
+        	let size = document.querySelector(".bottleSize span");
         	if(name && price && abv && size){
             	price = price.textContent.replace(/[ \t\n]*/g,'');
             	abv = abv.textContent.replace(/\%/i,''); // in percent
-            	const result = [name.textContent, price, abv, size.textContent];
+                size = size.textContent
+                let alcoholToPrice = abv * size.substring(0, size.length - 2) / 100 / price.substr(1);
+            	const result = [name.textContent, price, abv, size];
 				this.setState({
 					name: name.textContent, 
 					price,
 					abv,
-					size: size.textContent,
+					size: size,
+                    alcoholToPrice,
 					loaded: true
 				});
         	}
@@ -76,6 +79,10 @@ class Product extends Component {
 							<td>Price</td>
 							<td>{this.state.price}</td>
 						</tr>
+                        <tr>
+                            <td>% to price ratio</td>
+                            <td>{Math.round(this.state.alcoholToPrice * 100) / 100}</td>
+                        </tr>
 					</tbody>
 				</table>
 			</div>
